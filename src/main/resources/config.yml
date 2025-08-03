@@ -1,6 +1,10 @@
+# - What height the random layer chunk will begin at (default: 250)
+startheightY: 250
+
+# - Which blocks to disallow. Use custom flags "shulker" and or "infested" to disallow all flavors of said block
 disallowed-blocks:
-  - shulker
-  - infesteD
+  - SHULKER
+  - INFESTED
   - COMMAND_BLOCK
   - CHAIN_COMMAND_BLOCK
   - REPEATING_COMMAND_BLOCK

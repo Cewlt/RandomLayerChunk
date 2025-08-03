@@ -18,14 +18,16 @@ import java.util.List;
 import java.util.Random;
 
 public final class RandomLayerChunk extends JavaPlugin {
-    public final RandomLayerChunk randomLayerChunk = this;
+    private final RandomLayerChunk randomLayerChunk = this;
     private List<CustomChunk> activeCustomChunks;
 
     private ArrayList<Material> disallowedBlocks;
     private ArrayList<Material> allowedBlocks;
     private boolean disallowShulkers = false;
     private boolean disallowInfestedBlocks = false;
-    public int startHeightY = 250;
+
+    // what height the random layer chunk will start at
+    private int startHeightY = 0;
 
     @Override
     public void onEnable() {
@@ -48,12 +50,15 @@ public final class RandomLayerChunk extends JavaPlugin {
         return new VoidWorldGenerator();
     }
 
-    public RandomLayerChunk getRandomLayerChunk() {
-        return randomLayerChunk;
-    }
-
     public List<CustomChunk> getActiveCustomChunks() {
         return activeCustomChunks;
+    }
+
+    public int getStartHeightY() {
+        if(startHeightY == 0) {
+            loadStartHeightConfig();
+        }
+        return startHeightY;
     }
 
     public CustomChunk getCustomChunk(Chunk chunk) {
@@ -65,22 +70,35 @@ public final class RandomLayerChunk extends JavaPlugin {
     }
 
     public boolean isCustomChunk(Chunk chunk) {
-        if(activeCustomChunks == null) return false;
+        if(activeCustomChunks == null || activeCustomChunks.isEmpty()) return false;
         for(CustomChunk customChunk : activeCustomChunks) {
             if(customChunk.getBukkitChunk().getX() == chunk.getX()) return true;
         }
         return false;
     }
 
-    private void loadDisallowedBlocksConfig() {
-        if(disallowedBlocks == null) disallowedBlocks = new ArrayList<>();
-        List<String> disallowList = this.getConfig().getStringList("disallowed-blocks");
-        if(disallowList.isEmpty()) {
-            Bukkit.broadcastMessage("disallow-blocks list is empty");
+    private void loadStartHeightConfig() {
+        if(!this.getConfig().contains("startHeightY")
+                || !this.getConfig().isInt("startHeightY")) {
+            startHeightY = 250;
             return;
         }
-        if(disallowList.contains("shulker")) disallowShulkers = true;
-        if(disallowList.contains("infested")) disallowInfestedBlocks = true;
+        this.startHeightY = this.getConfig().getInt("startheightY");
+    }
+
+    private void loadDisallowedBlocksConfig() {
+        if(disallowedBlocks == null) disallowedBlocks = new ArrayList<>();
+        if(!this.getConfig().contains("disallowed-blocks")) return;
+        List<String> disallowList = this.getConfig().getStringList("disallowed-blocks");
+        if(disallowList.isEmpty()) return;
+        if(disallowList.contains("SHULKER")) {
+            disallowList.remove("SHULKER");
+            disallowShulkers = true;
+        }
+        if(disallowList.contains("INFESTED")) {
+            disallowList.remove("INFESTED");
+            disallowInfestedBlocks = true;
+        }
         for(String blockName : disallowList) {
             Material mat = Material.matchMaterial(blockName);
             if(mat == null) {
@@ -98,30 +116,24 @@ public final class RandomLayerChunk extends JavaPlugin {
     public ItemStack[] getRandomLoot(Location location) {
         Collection<ItemStack> itemStackCollection;
         int random = new Random().nextInt(100);
-        if(random < 5) {
+        if(random < 4) {
             itemStackCollection = LootTables.END_CITY_TREASURE.getLootTable()
                     .populateLoot(new Random(), new LootContext.Builder(location).build());
-            Bukkit.broadcastMessage("end city");
         } else if(random < 10) {
             itemStackCollection = LootTables.BASTION_TREASURE.getLootTable()
                     .populateLoot(new Random(), new LootContext.Builder(location).build());
-            Bukkit.broadcastMessage("bastion");
         } else if(random <= 25) {
             itemStackCollection = LootTables.SHIPWRECK_TREASURE.getLootTable()
                     .populateLoot(new Random(), new LootContext.Builder(location).build());
-            Bukkit.broadcastMessage("shipwrekc");
         } else if(random > 40 && random < 60) {
             itemStackCollection = LootTables.WOODLAND_MANSION.getLootTable()
                     .populateLoot(new Random(), new LootContext.Builder(location).build());
-            Bukkit.broadcastMessage("wooland mansion");
         } else if(random >= 75) {
             itemStackCollection = LootTables.IGLOO_CHEST.getLootTable()
                     .populateLoot(new Random(), new LootContext.Builder(location).build());
-            Bukkit.broadcastMessage("igloo");
         } else {
             itemStackCollection = LootTables.SIMPLE_DUNGEON.getLootTable()
                     .populateLoot(new Random(), new LootContext.Builder(location).build());
-            Bukkit.broadcastMessage("dungeon");
         }
         return itemStackCollection.stream()
                 .map(ItemStack::new)

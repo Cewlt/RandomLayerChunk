@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Random;
 
 public class CustomChunk  {
-    private RandomLayerChunk randomLayerChunk;
+    private final RandomLayerChunk randomLayerChunk;
     private final Chunk bukkitChunk;
     private BukkitTask layerTask;
 
@@ -50,22 +50,18 @@ public class CustomChunk  {
         return bukkitChunk;
     }
 
-   public ArrayList<Location> getNextLayer() {
-        ArrayList<Location> nextLayerLocations = new ArrayList<Location>();
-        if(bukkitChunk == null) {
-            // problem
-            return nextLayerLocations;
-        }
+   public List<Location> getNextLayer() {
+        List<Location> nextLayerLocations = new ArrayList<>();
         if(addedLayersCount == 0)  {
-            currentHeight = randomLayerChunk.startHeightY;
+            currentHeight = randomLayerChunk.getStartHeightY();
         } else {
-            currentHeight = randomLayerChunk.startHeightY - addedLayersCount;
+            currentHeight = randomLayerChunk.getStartHeightY() - addedLayersCount;
         }
         return getChunkLayer(bukkitChunk, currentHeight);
     }
 
-    public ArrayList<Location> getChunkLayer(Chunk chunk, int yHeight) {
-        ArrayList<Location> chunkLayer = new ArrayList<Location>();
+    public List<Location> getChunkLayer(Chunk chunk, int yHeight) {
+        List<Location> chunkLayer = new ArrayList<>();
         int minX = chunk.getX() * 16;
         int minZ = chunk.getZ() * 16;
         int maxX = minX + 16;
@@ -115,11 +111,8 @@ public class CustomChunk  {
 
     public void setNextLayer(Material material) {
         if (bukkitChunk == null) return;
-        ArrayList<Location> layer = getNextLayer();
-        if (layer.isEmpty()) {
-            Bukkit.broadcastMessage("LAYER empty");
-            return;
-        }
+        List<Location> layer = getNextLayer();
+        if (layer.isEmpty()) return;
         // enforced layers to ensure its possible to beat
         if (addedLayersCount == 0) {
             setFirstLayer(layer);
@@ -155,7 +148,16 @@ public class CustomChunk  {
                     }
                 }
             } else {
+                boolean spawnChest = false, chestSpawned = false;
+                if(new Random().nextInt(100) <= 3) {
+                    Location blockLocation = layer.get(1);
+                }
                 for (Location loc : layer) {
+                    if(spawnChest && !chestSpawned) {
+
+                        chestSpawned = true;
+                        continue;
+                    }
                     loc.getBlock().setType(material);
                 }
             }
@@ -163,7 +165,7 @@ public class CustomChunk  {
         }
     }
 
-    private void setFirstLayer(ArrayList<Location> layer) {
+    private void setFirstLayer(List<Location> layer) {
         World world = layer.get(1).getWorld();
         // place water before shuffling list
         layer.get(25).getBlock().setType(Material.WATER);
@@ -188,10 +190,6 @@ public class CustomChunk  {
         torchFlower.setY(torchFlower.getY() + 1);
         torchFlower.getBlock().setType(Material.TORCHFLOWER);
         //
-        Location fern = layer.get(new Random().nextInt(layer.size()));
-        fern.setY(fern.getY() + 1);
-        fern.getBlock().setType(Material.FERN);
-        //
         Location tree = layer.get(new Random().nextInt(layer.size()));
         tree = new Location(world, tree.getX(), tree.getY() + 1, tree.getZ());
         world.generateTree(tree, TreeType.REDWOOD);
@@ -201,7 +199,7 @@ public class CustomChunk  {
         bigCow = (LivingEntity)world.spawnEntity(cow, EntityType.MOOSHROOM);
     }
 
-    private void setEndPortalLayer(ArrayList<Location> layer) {
+    private void setEndPortalLayer(List<Location> layer) {
         // layer 1
         List<Location> wallsLayerOne = getChunkWalls(bukkitChunk, currentHeight);
         for(Location loc : wallsLayerOne) {
@@ -243,8 +241,8 @@ public class CustomChunk  {
         }
     }
 
-    public ArrayList<Block> getAllBlocksInChunk() {
-        ArrayList<Block> blocksInChunk = new ArrayList<>();
+    public List<Block> getAllBlocksInChunk() {
+        List<Block> blocksInChunk = new ArrayList<>();
         World world = bukkitChunk.getWorld();
         int minX = bukkitChunk.getX() * 16;
         int minZ = bukkitChunk.getZ() * 16;
@@ -261,8 +259,8 @@ public class CustomChunk  {
         return blocksInChunk;
     }
 
-    public static ArrayList<Block> getAllBlocksInChunk(Chunk chunk) {
-        ArrayList<Block> blocksInChunk = new ArrayList<>();
+    public static List<Block> getAllBlocksInChunk(Chunk chunk) {
+       List<Block> blocksInChunk = new ArrayList<>();
         World world = chunk.getWorld();
         int minX = chunk.getX() * 16;
         int minZ = chunk.getZ() * 16;
