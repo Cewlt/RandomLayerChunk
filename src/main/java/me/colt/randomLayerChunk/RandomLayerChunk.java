@@ -32,6 +32,7 @@ public final class RandomLayerChunk extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        RandomLoot.loadList();
         getCommand("clearchunk").setExecutor(new ClearChunkCommand(randomLayerChunk));
         getCommand("rlc").setExecutor(new RLCCommand(randomLayerChunk));
         new MilkCowEvent(randomLayerChunk);
@@ -39,10 +40,6 @@ public final class RandomLayerChunk extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // example wipe chunks
-        for(CustomChunk customChunk : activeCustomChunks) {
-            customChunk.deleteCustomChunk();
-        }
     }
 
     @Override
@@ -113,33 +110,6 @@ public final class RandomLayerChunk extends JavaPlugin {
         return disallowedBlocks;
     }
 
-    public ItemStack[] getRandomLoot(Location location) {
-        Collection<ItemStack> itemStackCollection;
-        int random = new Random().nextInt(100);
-        if(random < 4) {
-            itemStackCollection = LootTables.END_CITY_TREASURE.getLootTable()
-                    .populateLoot(new Random(), new LootContext.Builder(location).build());
-        } else if(random < 10) {
-            itemStackCollection = LootTables.BASTION_TREASURE.getLootTable()
-                    .populateLoot(new Random(), new LootContext.Builder(location).build());
-        } else if(random <= 25) {
-            itemStackCollection = LootTables.SHIPWRECK_TREASURE.getLootTable()
-                    .populateLoot(new Random(), new LootContext.Builder(location).build());
-        } else if(random > 40 && random < 60) {
-            itemStackCollection = LootTables.WOODLAND_MANSION.getLootTable()
-                    .populateLoot(new Random(), new LootContext.Builder(location).build());
-        } else if(random >= 75) {
-            itemStackCollection = LootTables.IGLOO_CHEST.getLootTable()
-                    .populateLoot(new Random(), new LootContext.Builder(location).build());
-        } else {
-            itemStackCollection = LootTables.SIMPLE_DUNGEON.getLootTable()
-                    .populateLoot(new Random(), new LootContext.Builder(location).build());
-        }
-        return itemStackCollection.stream()
-                .map(ItemStack::new)
-                .toArray(ItemStack[]::new);
-    }
-
     public CustomChunk startRandomLayerChunk(Chunk chunk) {
         if(activeCustomChunks == null) activeCustomChunks = new ArrayList<>();
         if(allowedBlocks == null) allowedBlocks = new ArrayList<>();
@@ -154,10 +124,7 @@ public final class RandomLayerChunk extends JavaPlugin {
             allowedBlocks.add(Material.WATER_CAULDRON);
             allowedBlocks.add(Material.LAVA_CAULDRON);
             for(Material m : Material.values()) {
-                if(m.name().contains("CHEST")) {
-                    allowedBlocks.add(Material.CHEST);
-                    continue;
-                }
+                if(m.name().contains("CHEST")) continue;
                 if(!m.isBlock() || !m.isOccluding()
                     || m.hasGravity() || !m.isSolid()) continue;
                 if(disallowedBlocks.contains(m)) continue;

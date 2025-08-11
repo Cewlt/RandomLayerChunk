@@ -1,6 +1,7 @@
 package me.colt.randomLayerChunk;
 
 import org.bukkit.*;
+import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.EntityType;
@@ -78,8 +79,8 @@ public class CustomChunk  {
         List<Location> wallBlocks = new ArrayList<>();
         World world = chunk.getWorld();
 
-        int startX = chunk.getX() << 4; // chunk.getX() * 16
-        int startZ = chunk.getZ() << 4; // chunk.getZ() * 16
+        int startX = chunk.getX() * 16;
+        int startZ = chunk.getZ() * 16;
 
         for (int i = 0; i < 16; i++) {
             wallBlocks.add(new Location(world, startX + i, yHeight, startZ));
@@ -95,8 +96,8 @@ public class CustomChunk  {
         List<Location> wallBlocks = new ArrayList<>();
         World world = chunk.getWorld();
 
-        int startX = chunk.getX() << 4; // chunk.getX() * 16
-        int startZ = chunk.getZ() << 4; // chunk.getZ() * 16
+        int startX = chunk.getX() * 16;
+        int startZ = chunk.getZ() * 16;
 
         for (int y = minY; y < maxY; y++) {
             for (int i = 0; i < 16; i++) {
@@ -116,58 +117,49 @@ public class CustomChunk  {
         // enforced layers to ensure its possible to beat
         if (addedLayersCount == 0) {
             setFirstLayer(layer);
-            addedLayersCount = 2;
+            addedLayersCount = 1;
         } else if(currentHeight == 225) {
             for (Location loc : layer) {
                 loc.getBlock().setType(Material.IRON_ORE);
             }
-            ++addedLayersCount;
-        } else if(currentHeight == 175) {
+        } else if(currentHeight == 125) {
             for (Location loc : layer) {
                 loc.getBlock().setType(Material.DEEPSLATE_DIAMOND_ORE);
             }
-            ++addedLayersCount;
-        } else if(currentHeight == 125) {
+        } else if(currentHeight == 100) {
             for (Location loc : layer) {
                 loc.getBlock().setType(Material.OBSIDIAN);
             }
-            ++addedLayersCount;
-        } else if(currentHeight == 50) {
-            // wip
+        } else if(currentHeight == 10) {
             setEndPortalLayer(layer);
-            addedLayersCount = addedLayersCount + 10;
         } else {
-            if(material == Material.CHEST) {
-                for (Location loc : layer) {
-                    Block block = loc.getBlock();
-                    block.setType(material);
-                    if(new Random().nextInt(100) <= 20) {
-                        Chest chest = (Chest) block.getState();
-                        Inventory chestInventory = chest.getBlockInventory();
-                        chestInventory.setContents(randomLayerChunk.getRandomLoot(loc));
-                    }
-                }
-            } else {
-                boolean spawnChest = false, chestSpawned = false;
-                if(new Random().nextInt(100) <= 3) {
-                    Location blockLocation = layer.get(1);
-                }
-                for (Location loc : layer) {
-                    if(spawnChest && !chestSpawned) {
-
-                        chestSpawned = true;
-                        continue;
-                    }
-                    loc.getBlock().setType(material);
-                }
+            boolean spawnChest = false, chestSpawned = false;
+            if(new Random().nextInt(100) <= 3) {
+                spawnChest = true;
             }
-            ++addedLayersCount;
+            // Shuffle the list so the below line of code "layer.get(1)" becomes a random block
+            Collections.shuffle(layer);
+            for (Location loc : layer) {
+                if(spawnChest && !chestSpawned) {
+                    Block block = loc.getBlock();
+                    block.setType(Material.BARREL);
+                    Barrel barrel = (Barrel) block.getState();
+                    Inventory barrelInventory = barrel.getInventory();
+                    barrelInventory.setContents(RandomLoot.getRandomLoot(loc));
+                    chestSpawned = true;
+                    continue;
+                }
+                loc.getBlock().setType(material);
+            }
         }
+        ++addedLayersCount;
     }
 
     private void setFirstLayer(List<Location> layer) {
-        World world = layer.get(1).getWorld();
+        World world = this.bukkitChunk.getWorld();
         // place water before shuffling list
+        // reason for the use of number 25 and 26 is this places it far enough
+        // inside the chunk that it will not be on the outer edge and flowing down
         layer.get(25).getBlock().setType(Material.WATER);
         layer.get(26).getBlock().setType(Material.WATER);
         int grass = 0, flowers = 0;
@@ -206,10 +198,22 @@ public class CustomChunk  {
             loc.getBlock().setType(Material.MOSSY_STONE_BRICKS);
         }
         // layer 2-5
-        List<Location> layerFive = getChunkWalls(bukkitChunk, currentHeight - 1, currentHeight - 4);
+        for(int i = 0; i < 5; i++) {
+            List<Location> nextLayer = getChunkWalls(bukkitChunk, currentHeight - i);
+            for(Location loc : nextLayer) {
+                loc.getBlock().setType(Material.MOSSY_STONE_BRICKS);
+            }
+        }
+        // bottom layer
+        List<Location> layerFive = getChunkLayer(bukkitChunk, currentHeight - 5);
         for(Location loc : layerFive) {
             loc.getBlock().setType(Material.STONE_BRICKS);
         }
+        // end portal
+        Location layerCenter = ChunkUtil.getChunkCenter(bukkitChunk, currentHeight - 4);
+        ChunkUtil.createEndPortal(bukkitChunk.getWorld(), layerCenter.getBlockX(),
+                layerCenter.getBlockY(), layerCenter.getBlockZ());
+        addedLayersCount += 10;
     }
 
     private void growBigCow() {

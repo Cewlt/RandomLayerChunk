@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'me.colt'
@@ -20,6 +21,9 @@ repositories {
 
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.21.6-R0.1-SNAPSHOT")
+    implementation 'org.apache.commons:commons-rng-core:1.6'
+    implementation 'org.apache.commons:commons-rng-simple:1.6'
+    implementation 'org.apache.commons:commons-rng-sampling:1.6'
 }
 
 tasks {
@@ -47,6 +51,10 @@ tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release.set(targetJavaVersion)
     }
+}
+
+tasks.shadowJar {
+    relocate 'org.apache.commons.rng', 'me.colt.libs.commonsrng'
 }
 
 processResources {
