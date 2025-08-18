@@ -1,0 +1,42 @@
+## Random Layer Chunk
+
+ ![](https://drive.google.com/uc?export=download&id=1mlpF_76wD2fJwZkLDoxeOIQ59kOGwh17)
+
+ ### Configuration:
+ ```yaml
+# - What height the random layer chunk will begin at
+# This cannot be 0 - it can be any valid Minecraft world height other than that
+# (default: 250)
+startheightY: 250
+
+# Do we want to notify the player when a random loot treasure barrel is spawned in a chunk?
+# If not they may not realize it is there (true or false)
+# (default: true)
+notifyLootBarrel: true
+
+# If notifyLootBarrel is true what message do we send to the player upon loot barrel spawn
+# The {BLOCK_NAME} variable will be replaced with the display name of the block of the relevant layer
+# The {HEIGHT} variable will be replaced with the Y height of the relevant layer
+# default: "&4A loot chest has spawned in the {BLOCK_NAME} layer at Y: {HEIGHT}"
+notifyLootBarrel-message: "&4A loot chest has spawned in the {BLOCK_NAME} layer at Y: {HEIGHT}"
+
+# - Which blocks to disallow.
+# Use custom flags "SHULKER" and or "INFESTED" to disallow all flavors of said block
+disallowed-blocks:
+  - SHULKER
+  - INFESTED
+  - COMMAND_BLOCK
+  - CHAIN_COMMAND_BLOCK
+  - REPEATING_COMMAND_BLOCK
+  - BEDROCK
+  - BARRIER
+  - END_PORTAL_FRAME
+  - END_PORTAL
+  - END_GATEWAY
+  - CRYING_OBSIDIAN
+  - OBSIDIAN
+  - JIGSAW
+  - RESPAWN_ANCHOR
+  - TEST_INSTANCE_BLOCK
+  - TEST_BLOCK
+```
