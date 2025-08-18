@@ -6,14 +6,10 @@ import me.colt.randomLayerChunk.events.MilkCowEvent;
 import me.colt.randomLayerChunk.worldgeneration.VoidWorldGenerator;
 import org.bukkit.*;
 import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.loot.LootContext;
-import org.bukkit.loot.LootTables;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
