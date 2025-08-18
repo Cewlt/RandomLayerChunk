@@ -18,6 +18,7 @@ import java.util.Random;
 
 public class CustomChunk  {
     private final RandomLayerChunk randomLayerChunk;
+    private final ConfigManager config;
     private final Chunk bukkitChunk;
     private BukkitTask layerTask;
 
@@ -32,6 +33,7 @@ public class CustomChunk  {
     public CustomChunk(RandomLayerChunk randomLayerChunk, Chunk bukkitChunk) {
         this.randomLayerChunk = randomLayerChunk;
         this.bukkitChunk = bukkitChunk;
+        this.config = randomLayerChunk.getConfigManager();
         startScheduler();
     }
 
@@ -39,7 +41,7 @@ public class CustomChunk  {
         BukkitScheduler scheduler = Bukkit.getScheduler();
         layerTask = scheduler.runTaskTimer(randomLayerChunk, () -> {
             setNextLayer(randomLayerChunk.getRandomBlock());
-            growBigCow();
+            //growBigCow();
         }, 20L * 5L, 20L * delayBetweenLayers);
     }
 
@@ -130,7 +132,7 @@ public class CustomChunk  {
             for (Location loc : layer) {
                 loc.getBlock().setType(Material.OBSIDIAN);
             }
-        } else if(currentHeight == 10) {
+        } else if(currentHeight == 25) {
             setEndPortalLayer(layer);
         } else {
             boolean spawnChest = false, chestSpawned = false;
@@ -147,6 +149,10 @@ public class CustomChunk  {
                     Inventory barrelInventory = barrel.getInventory();
                     barrelInventory.setContents(RandomLoot.getRandomLoot(loc));
                     chestSpawned = true;
+                    if(config.getNotifyLoot()) {
+                        String message = config.formatLootMessage(material.name(), String.valueOf(block.getY()));
+                        Bukkit.broadcastMessage(message);
+                    }
                     continue;
                 }
                 loc.getBlock().setType(material);
@@ -193,27 +199,27 @@ public class CustomChunk  {
 
     private void setEndPortalLayer(List<Location> layer) {
         // layer 1
-        List<Location> wallsLayerOne = getChunkWalls(bukkitChunk, currentHeight);
+        /*List<Location> wallsLayerOne = getChunkWalls(bukkitChunk, currentHeight);
         for(Location loc : wallsLayerOne) {
-            loc.getBlock().setType(Material.MOSSY_STONE_BRICKS);
-        }
-        // layer 2-5
+            loc.getBlock().setType(Material.STONE_BRICKS);
+        }*/
+        // layer 1-5
         for(int i = 0; i < 5; i++) {
             List<Location> nextLayer = getChunkWalls(bukkitChunk, currentHeight - i);
             for(Location loc : nextLayer) {
-                loc.getBlock().setType(Material.MOSSY_STONE_BRICKS);
+                loc.getBlock().setType(Material.STONE_BRICKS);
             }
-        }
-        // bottom layer
-        List<Location> layerFive = getChunkLayer(bukkitChunk, currentHeight - 5);
-        for(Location loc : layerFive) {
-            loc.getBlock().setType(Material.STONE_BRICKS);
         }
         // end portal
         Location layerCenter = ChunkUtil.getChunkCenter(bukkitChunk, currentHeight - 4);
         ChunkUtil.createEndPortal(bukkitChunk.getWorld(), layerCenter.getBlockX(),
                 layerCenter.getBlockY(), layerCenter.getBlockZ());
-        addedLayersCount += 10;
+        // bottom floor layer
+        List<Location> layerFive = getChunkLayer(bukkitChunk, currentHeight - 5);
+        for(Location loc : layerFive) {
+            loc.getBlock().setType(Material.STONE_BRICKS);
+        }
+        addedLayersCount += 5;
     }
 
     private void growBigCow() {

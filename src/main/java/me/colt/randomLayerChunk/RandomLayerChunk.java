@@ -19,20 +19,22 @@ import java.util.Random;
 
 public final class RandomLayerChunk extends JavaPlugin {
     private final RandomLayerChunk randomLayerChunk = this;
+    private ConfigManager configManager;
     private List<CustomChunk> activeCustomChunks;
 
-    private ArrayList<Material> disallowedBlocks;
-    private ArrayList<Material> allowedBlocks;
-    private boolean disallowShulkers = false;
-    private boolean disallowInfestedBlocks = false;
+    public ArrayList<Material> disallowedBlocks;
+    public ArrayList<Material> allowedBlocks;
+    public boolean disallowShulkers;
+    public boolean disallowInfestedBlocks;
 
     // what height the random layer chunk will start at
-    private int startHeightY = 0;
+    public int startHeightY = 0;
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
         RandomLoot.loadList();
+        configManager = new ConfigManager(this);
+        configManager.loadAllConfig();
         getCommand("clearchunk").setExecutor(new ClearChunkCommand(randomLayerChunk));
         getCommand("rlc").setExecutor(new RLCCommand(randomLayerChunk));
         new MilkCowEvent(randomLayerChunk);
@@ -47,13 +49,17 @@ public final class RandomLayerChunk extends JavaPlugin {
         return new VoidWorldGenerator();
     }
 
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
     public List<CustomChunk> getActiveCustomChunks() {
         return activeCustomChunks;
     }
 
     public int getStartHeightY() {
         if(startHeightY == 0) {
-            loadStartHeightConfig();
+            configManager.loadStartHeightConfig();
         }
         return startHeightY;
     }
@@ -74,38 +80,6 @@ public final class RandomLayerChunk extends JavaPlugin {
         return false;
     }
 
-    private void loadStartHeightConfig() {
-        if(!this.getConfig().contains("startHeightY")
-                || !this.getConfig().isInt("startHeightY")) {
-            startHeightY = 250;
-            return;
-        }
-        this.startHeightY = this.getConfig().getInt("startheightY");
-    }
-
-    private void loadDisallowedBlocksConfig() {
-        if(disallowedBlocks == null) disallowedBlocks = new ArrayList<>();
-        if(!this.getConfig().contains("disallowed-blocks")) return;
-        List<String> disallowList = this.getConfig().getStringList("disallowed-blocks");
-        if(disallowList.isEmpty()) return;
-        if(disallowList.contains("SHULKER")) {
-            disallowList.remove("SHULKER");
-            disallowShulkers = true;
-        }
-        if(disallowList.contains("INFESTED")) {
-            disallowList.remove("INFESTED");
-            disallowInfestedBlocks = true;
-        }
-        for(String blockName : disallowList) {
-            Material mat = Material.matchMaterial(blockName);
-            if(mat == null) {
-                Bukkit.broadcastMessage(blockName + " could not be matched");
-                continue;
-            }
-            disallowedBlocks.add(mat);
-        }
-    }
-
     public ArrayList<Material> getDisallowedBlocks() {
         return disallowedBlocks;
     }
@@ -113,7 +87,7 @@ public final class RandomLayerChunk extends JavaPlugin {
     public CustomChunk startRandomLayerChunk(Chunk chunk) {
         if(activeCustomChunks == null) activeCustomChunks = new ArrayList<>();
         if(allowedBlocks == null) allowedBlocks = new ArrayList<>();
-        if(disallowedBlocks == null) loadDisallowedBlocksConfig();
+        if(disallowedBlocks == null) configManager.loadDisallowedBlocksConfig();
         CustomChunk customChunk = new CustomChunk(randomLayerChunk, chunk);
         activeCustomChunks.add(customChunk);
         return customChunk;
