@@ -19,7 +19,7 @@ public class RLCCommand implements CommandExecutor {
             if (!(commandSender instanceof Player)) return false;
             Player player = (Player) commandSender;
             player.sendMessage("starting random layer chunk");
-            randomLayerChunk.startRandomLayerChunk(player.getLocation().getChunk());
+            randomLayerChunk.startRandomLayerChunk(player.getLocation().getChunk(), player.getUniqueId());
             return true;
         }
         return false;

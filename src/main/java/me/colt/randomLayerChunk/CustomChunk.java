@@ -7,14 +7,12 @@ import org.bukkit.block.Chest;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class CustomChunk  {
     private final RandomLayerChunk randomLayerChunk;
@@ -22,18 +20,22 @@ public class CustomChunk  {
     private final Chunk bukkitChunk;
     private BukkitTask layerTask;
 
+    private UUID ownerUUID;
+
     // delayBetweenLayers in seconds
-    private long delayBetweenLayers = 10L;
+    private long delayBetweenLayers;
 
     private int addedLayersCount;
     private int currentHeight;
 
     private LivingEntity bigCow;
 
-    public CustomChunk(RandomLayerChunk randomLayerChunk, Chunk bukkitChunk) {
+    public CustomChunk(RandomLayerChunk randomLayerChunk, Chunk bukkitChunk, UUID uuid) {
         this.randomLayerChunk = randomLayerChunk;
         this.bukkitChunk = bukkitChunk;
         this.config = randomLayerChunk.getConfigManager();
+        this.ownerUUID = uuid;
+        this.delayBetweenLayers = config.getDelayBetweenLayers();
         startScheduler();
     }
 
@@ -53,12 +55,20 @@ public class CustomChunk  {
         return bukkitChunk;
     }
 
+    public Player getChunkOwner() {
+        if(randomLayerChunk.getServer().getPlayer(ownerUUID) == null) {
+            return null;
+        } else {
+            return randomLayerChunk.getServer().getPlayer(ownerUUID);
+        }
+    }
+
    public List<Location> getNextLayer() {
         List<Location> nextLayerLocations = new ArrayList<>();
         if(addedLayersCount == 0)  {
-            currentHeight = randomLayerChunk.getStartHeightY();
+            currentHeight = config.getStartHeightY();
         } else {
-            currentHeight = randomLayerChunk.getStartHeightY() - addedLayersCount;
+            currentHeight = config.getStartHeightY() - addedLayersCount;
         }
         return getChunkLayer(bukkitChunk, currentHeight);
     }
@@ -120,20 +130,15 @@ public class CustomChunk  {
         if (addedLayersCount == 0) {
             setFirstLayer(layer);
             addedLayersCount = 1;
-        } else if(currentHeight == 225) {
-            for (Location loc : layer) {
-                loc.getBlock().setType(Material.IRON_ORE);
+        } else if(config.getForcedLayers().containsKey(currentHeight)) {
+            Material mat = config.getForcedLayers().get(currentHeight);
+            if(mat == Material.END_PORTAL) {
+                setEndPortalLayer(layer);
+            } else {
+                for(Location loc : layer) {
+                    loc.getBlock().setType(mat);
+                }
             }
-        } else if(currentHeight == 125) {
-            for (Location loc : layer) {
-                loc.getBlock().setType(Material.DEEPSLATE_DIAMOND_ORE);
-            }
-        } else if(currentHeight == 100) {
-            for (Location loc : layer) {
-                loc.getBlock().setType(Material.OBSIDIAN);
-            }
-        } else if(currentHeight == 25) {
-            setEndPortalLayer(layer);
         } else {
             boolean spawnChest = false, chestSpawned = false;
             if(new Random().nextInt(100) <= 3) {

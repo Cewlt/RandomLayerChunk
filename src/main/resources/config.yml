@@ -1,21 +1,39 @@
 # - What height the random layer chunk will begin at
 # This cannot be 0 - it can be any valid Minecraft world height other than that
-# (default: 250)
+# default: 250
 startheightY: 250
+
+# How much of a delay in seconds between each layer being spawned
+# default: 10 (in seconds)
+delayBetweenLayers: 10
+
+# Which layers do we want to force spawn at specific heights
+# This allows for assured ability to complete the game
+# Defaults include iron, diamond, obsidian and
+# the custom flag END_LAYER which spawns an end room with end portal
+#
+# Format is y height followed by the block type (99:STONE)
+# Get block names from here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+forcedLayers:
+  - "225:IRON_ORE"
+  - "125:DEEPSLATE_DIAMOND_ORE"
+  - "100:OBSIDIAN"
+  - "243:END_LAYER"
 
 # Do we want to notify the player when a random loot treasure barrel is spawned in a chunk?
 # If not they may not realize it is there (true or false)
-# (default: true)
+# * default: true
 notifyLootBarrel: true
 
 # If notifyLootBarrel is true what message do we send to the player upon loot barrel spawn
 # The {BLOCK_NAME} variable will be replaced with the display name of the block of the relevant layer
 # The {HEIGHT} variable will be replaced with the Y height of the relevant layer
-# default: "&4A loot chest has spawned in the {BLOCK_NAME} layer at Y: {HEIGHT}"
+# default: "&4A loot chest has spawned in the {BLOCK_NAME} layer at Y: {HEIGHT}
 notifyLootBarrel-message: "&4A loot chest has spawned in the {BLOCK_NAME} layer at Y: {HEIGHT}"
 
 # - Which blocks to disallow.
 # Use custom flags "SHULKER" and or "INFESTED" to disallow all flavors of said block
+# Get block names from here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 disallowed-blocks:
   - SHULKER
   - INFESTED

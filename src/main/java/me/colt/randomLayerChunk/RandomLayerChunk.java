@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 public final class RandomLayerChunk extends JavaPlugin {
     private final RandomLayerChunk randomLayerChunk = this;
@@ -22,9 +23,6 @@ public final class RandomLayerChunk extends JavaPlugin {
     public ArrayList<Material> allowedBlocks;
     public boolean disallowShulkers;
     public boolean disallowInfestedBlocks;
-
-    // what height the random layer chunk will start at
-    public int startHeightY = 0;
 
     @Override
     public void onEnable() {
@@ -53,13 +51,6 @@ public final class RandomLayerChunk extends JavaPlugin {
         return activeCustomChunks;
     }
 
-    public int getStartHeightY() {
-        if(startHeightY == 0) {
-            configManager.loadStartHeightConfig();
-        }
-        return startHeightY;
-    }
-
     public CustomChunk getCustomChunk(Chunk chunk) {
         if(!isCustomChunk(chunk)) return null;
         for(CustomChunk customChunk : activeCustomChunks) {
@@ -80,11 +71,10 @@ public final class RandomLayerChunk extends JavaPlugin {
         return disallowedBlocks;
     }
 
-    public CustomChunk startRandomLayerChunk(Chunk chunk) {
+    public CustomChunk startRandomLayerChunk(Chunk chunk, UUID uuid) {
         if(activeCustomChunks == null) activeCustomChunks = new ArrayList<>();
         if(allowedBlocks == null) allowedBlocks = new ArrayList<>();
-        if(disallowedBlocks == null) configManager.loadDisallowedBlocksConfig();
-        CustomChunk customChunk = new CustomChunk(randomLayerChunk, chunk);
+        CustomChunk customChunk = new CustomChunk(randomLayerChunk, chunk, uuid);
         activeCustomChunks.add(customChunk);
         return customChunk;
     }

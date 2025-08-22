@@ -6,14 +6,23 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ConfigManager {
     private final RandomLayerChunk randomLayerChunk;
     private FileConfiguration config;
 
+    // what height the random layer chunk will start at
+    public int startHeightY = 0;
+
     private boolean notifyLoot;
     private String notifyLootMessage;
+
+    private long delayBetweenLayers;
+
+    private Map<Integer, Material> forcedLayers;
 
     public ConfigManager(RandomLayerChunk randomLayerChunk) {
         this.randomLayerChunk = randomLayerChunk;
@@ -25,18 +34,24 @@ public class ConfigManager {
         loadStartHeightConfig();
         loadDisallowedBlocksConfig();
         loadNotifyLoot();
+        loadDelayBetweenLayers();
+        loadForcedLayers();
     }
 
-    public void loadStartHeightConfig() {
+    private void loadStartHeightConfig() {
         if(!config.contains("startHeightY")
                 || !config.isInt("startHeightY")) {
-            randomLayerChunk.startHeightY = 250;
+            this.startHeightY = 250;
             return;
         }
-        randomLayerChunk.startHeightY = config.getInt("startheightY");
+        this.startHeightY = config.getInt("startheightY");
     }
 
-    public void loadDisallowedBlocksConfig() {
+    public int getStartHeightY() {
+        return this.startHeightY;
+    }
+
+    private void loadDisallowedBlocksConfig() {
         if(randomLayerChunk.disallowedBlocks == null) randomLayerChunk.disallowedBlocks = new ArrayList<>();
         if(!config.contains("disallowed-blocks")) return;
         List<String> disallowList = config.getStringList("disallowed-blocks");
@@ -59,7 +74,7 @@ public class ConfigManager {
         }
     }
 
-    public void loadNotifyLoot() {
+    private void loadNotifyLoot() {
         if(config.contains("notifyLootBarrel") && config.isBoolean("notifyLootBarrel")) {
             this.notifyLoot = config.getBoolean("notifyLootBarrel");
         } else {
@@ -70,12 +85,49 @@ public class ConfigManager {
         }
     }
 
+    private void loadDelayBetweenLayers() {
+        if(config.contains("delayBetweenLayers") && config.isInt("delayBetweenLayers")) {
+            this.delayBetweenLayers = config.getInt("delayBetweenLayers");
+        } else {
+            this.delayBetweenLayers = 10;
+        }
+    }
+
+    private void loadForcedLayers() {
+        forcedLayers = new HashMap<>();
+        if(config.contains("forcedLayers") && !config.getStringList("forcedLayers").isEmpty()) {
+            for(String string : config.getStringList("forcedLayers")) {
+                String[] split = string.split(":");
+                if(split.length != 2) continue;
+                String yHeight = split[0];
+                String block = split[1];
+                if(Material.matchMaterial(block) == null) {
+                    if(block.equals("END_LAYER")) {
+                        block = "END_PORTAL";
+                    } else {
+                        Bukkit.broadcastMessage("Configuration issue block not found: " + block);
+                        continue;
+                    }
+                }
+                forcedLayers.put(Integer.valueOf(yHeight), Material.matchMaterial(block));
+            }
+        }
+    }
+
+    public Map<Integer, Material> getForcedLayers() {
+        return this.forcedLayers;
+    }
+
     public boolean getNotifyLoot() {
         return this.notifyLoot;
     }
 
     public String getNotifyLootMessage() {
         return this.notifyLootMessage;
+    }
+
+    public long getDelayBetweenLayers() {
+        return this.delayBetweenLayers;
     }
 
     public String colorFormat(String text) {
