@@ -4,13 +4,20 @@
 
  ### Configuration:
  ```yaml
+# What height the random layer chunk will begin at
 # This cannot be 0 - it can be any valid Minecraft world height other than that
 # default: 250
-startheightY: 250
+startHeightY: 250
 
 # How much of a delay in seconds between each layer being spawned
 # default: 10 (in seconds)
 delayBetweenLayers: 10
+
+# How much of a distance, in chunks, should be between each generate chunk.
+# For example the default is 1 so a random layer chunk would be every other chunk
+# If you want to allow more build space for your players maybe increase this
+# default: 1 (in chunks)
+distanceBetweenChunks: 1
 
 # Which layers do we want to force spawn at specific heights
 # This allows for assured ability to complete the game
@@ -27,7 +34,7 @@ forcedLayers:
 
 # Do we want to notify the player when a random loot treasure barrel is spawned in a chunk?
 # If not they may not realize it is there (true or false)
-# * default: true
+# default: true
 notifyLootBarrel: true
 
 # If notifyLootBarrel is true what message do we send to the player upon loot barrel spawn
@@ -36,7 +43,7 @@ notifyLootBarrel: true
 # default: "&4A loot chest has spawned in the {BLOCK_NAME} layer at Y: {HEIGHT}
 notifyLootBarrel-message: "&4A loot chest has spawned in the {BLOCK_NAME} layer at Y: {HEIGHT}"
 
-# - Which blocks to disallow.
+# Which blocks to disallow.
 # Use custom flags "SHULKER" and or "INFESTED" to disallow all flavors of said block
 # Get block names from here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 disallowed-blocks:
