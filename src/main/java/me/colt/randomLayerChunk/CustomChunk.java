@@ -42,8 +42,13 @@ public class CustomChunk  {
     public void startScheduler() {
         BukkitScheduler scheduler = Bukkit.getScheduler();
         layerTask = scheduler.runTaskTimer(randomLayerChunk, () -> {
+            if(config.getStopWhenEmpty()) {
+                if(Arrays.stream(bukkitChunk.getEntities())
+                        .noneMatch(entity -> entity.getUniqueId().equals(ownerUUID))) {
+                    return;
+                }
+            }
             setNextLayer(randomLayerChunk.getRandomBlock());
-            //growBigCow();
         }, 20L * 5L, 20L * delayBetweenLayers);
     }
 
@@ -63,7 +68,11 @@ public class CustomChunk  {
         }
     }
 
-   public List<Location> getNextLayer() {
+    public UUID getOwnerUUID() {
+        return ownerUUID;
+    }
+
+    public List<Location> getNextLayer() {
         List<Location> nextLayerLocations = new ArrayList<>();
         if(addedLayersCount == 0)  {
             currentHeight = config.getStartHeightY();

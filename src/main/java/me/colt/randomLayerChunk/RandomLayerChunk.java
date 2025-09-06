@@ -3,11 +3,13 @@ package me.colt.randomLayerChunk;
 import me.colt.randomLayerChunk.commands.ClearChunkCommand;
 import me.colt.randomLayerChunk.commands.RLCCommand;
 import me.colt.randomLayerChunk.events.MilkCowEvent;
+import me.colt.randomLayerChunk.events.PlayerLeave;
 import me.colt.randomLayerChunk.worldgeneration.VoidWorldGenerator;
 import org.bukkit.*;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ public final class RandomLayerChunk extends JavaPlugin {
         getCommand("clearchunk").setExecutor(new ClearChunkCommand(randomLayerChunk));
         getCommand("rlc").setExecutor(new RLCCommand(randomLayerChunk));
         new MilkCowEvent(randomLayerChunk);
+        new PlayerLeave(randomLayerChunk);
     }
 
     @Override
@@ -65,6 +68,21 @@ public final class RandomLayerChunk extends JavaPlugin {
             if(customChunk.getBukkitChunk().getX() == chunk.getX()) return true;
         }
         return false;
+    }
+
+    public boolean hasCustomChunk(UUID uuid) {
+        return getActiveCustomChunks()
+                .stream()
+                .anyMatch(customChunk -> customChunk.getOwnerUUID().equals(uuid));
+    }
+
+    public CustomChunk getPlayerChunk(UUID uuid) {
+        if(!hasCustomChunk(uuid)) return null;
+        return getActiveCustomChunks()
+                .stream()
+                .filter(customChunk -> customChunk.getOwnerUUID().equals(uuid))
+                .findFirst()
+                .orElse(null);
     }
 
     public ArrayList<Material> getDisallowedBlocks() {

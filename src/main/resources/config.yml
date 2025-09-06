@@ -13,6 +13,10 @@ delayBetweenLayers: 10
 # default: 1 (in chunks)
 distanceBetweenChunks: 1
 
+# Should the layers stop generating when the owner of the chunk is not presently in the chunk?
+# default: true
+stopLayersWhenUnoccupied: true
+
 # Which layers do we want to force spawn at specific heights
 # This allows for assured ability to complete the game
 # Defaults include iron, diamond, obsidian and

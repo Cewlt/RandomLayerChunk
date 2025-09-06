@@ -24,6 +24,8 @@ public class ConfigManager {
 
     private int distanceBetweenChunks = 1;
 
+    private boolean stopWhenEmpty;
+
     private Map<Integer, Material> forcedLayers;
 
     public ConfigManager(RandomLayerChunk randomLayerChunk) {
@@ -33,14 +35,16 @@ public class ConfigManager {
 
     public void loadAllConfig() {
         randomLayerChunk.saveDefaultConfig();
-        loadStartHeightConfig();
-        loadDisallowedBlocksConfig();
+        loadStartHeight();
+        loadDisallowedBlocks();
         loadNotifyLoot();
         loadDelayBetweenLayers();
         loadForcedLayers();
+        loadDistanceBetweenChunks();
+        loadStopWhenEmpty();
     }
 
-    private void loadStartHeightConfig() {
+    private void loadStartHeight() {
         if(config.contains("startHeightY") && config.isInt("startHeightY")) {
             this.startHeightY = config.getInt("startHeightY");
         }
@@ -50,7 +54,7 @@ public class ConfigManager {
         return this.startHeightY;
     }
 
-    private void loadDisallowedBlocksConfig() {
+    private void loadDisallowedBlocks() {
         if(randomLayerChunk.disallowedBlocks == null) randomLayerChunk.disallowedBlocks = new ArrayList<>();
         if(!config.contains("disallowed-blocks")) return;
         List<String> disallowList = config.getStringList("disallowed-blocks");
@@ -119,12 +123,24 @@ public class ConfigManager {
         }
     }
 
+    private void loadStopWhenEmpty() {
+        if(config.contains("stopLayersWhenUnoccupied") && config.isBoolean("stopLayersWhenUnoccupied")) {
+            this.stopWhenEmpty = config.getBoolean("stopLayersWhenUnoccupied");
+        } else {
+            this.stopWhenEmpty = true;
+        }
+    }
+
     public Map<Integer, Material> getForcedLayers() {
         return this.forcedLayers;
     }
 
     public boolean getNotifyLoot() {
         return this.notifyLoot;
+    }
+
+    public boolean getStopWhenEmpty() {
+        return this.stopWhenEmpty;
     }
 
     public String getNotifyLootMessage() {

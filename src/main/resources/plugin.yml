@@ -1,5 +1,5 @@
 name: RandomLayerChunk
-version: '1.0-SNAPSHOT'
+version: '1.0.1'
 main: me.colt.randomLayerChunk.RandomLayerChunk
 api-version: '1.20'
 load: STARTUP
@@ -10,3 +10,16 @@ commands:
   rlc:
     description: "rlcea"
     usage: "/rlc"
+permissions:
+  randomlayerchunk.user.generate:
+    description: Base level permission for a user to generate/create a Random Layer Chunk
+    default: op
+  randomlayerchunk.user.clear:
+    description: Base level permission for a user to clear/delete their OWN Random Layer Chunk(s)
+    default: op
+  randomlayerchunk.admin.generate:
+    description: Permission for admin to generate/create a Random Layer Chunk for any player
+    default: op
+  randomlayerchunk.admin.clear:
+    description: Permission for admin to clear/delete ANY Random Layer Chunk(s)
+    default: op
