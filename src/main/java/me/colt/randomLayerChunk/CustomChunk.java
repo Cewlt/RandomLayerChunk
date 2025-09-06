@@ -203,11 +203,6 @@ public class CustomChunk  {
     }
 
     private void setEndPortalLayer(List<Location> layer) {
-        // layer 1
-        /*List<Location> wallsLayerOne = getChunkWalls(bukkitChunk, currentHeight);
-        for(Location loc : wallsLayerOne) {
-            loc.getBlock().setType(Material.STONE_BRICKS);
-        }*/
         // layer 1-5
         for(int i = 0; i < 5; i++) {
             List<Location> nextLayer = getChunkWalls(bukkitChunk, currentHeight - i);

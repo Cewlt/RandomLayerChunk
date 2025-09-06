@@ -15,12 +15,14 @@ public class ConfigManager {
     private FileConfiguration config;
 
     // what height the random layer chunk will start at
-    public int startHeightY = 0;
+    public int startHeightY = 250;
 
     private boolean notifyLoot;
     private String notifyLootMessage;
 
     private long delayBetweenLayers;
+
+    private int distanceBetweenChunks = 1;
 
     private Map<Integer, Material> forcedLayers;
 
@@ -39,12 +41,9 @@ public class ConfigManager {
     }
 
     private void loadStartHeightConfig() {
-        if(!config.contains("startHeightY")
-                || !config.isInt("startHeightY")) {
-            this.startHeightY = 250;
-            return;
+        if(config.contains("startHeightY") && config.isInt("startHeightY")) {
+            this.startHeightY = config.getInt("startHeightY");
         }
-        this.startHeightY = config.getInt("startheightY");
     }
 
     public int getStartHeightY() {
@@ -114,6 +113,12 @@ public class ConfigManager {
         }
     }
 
+    private void loadDistanceBetweenChunks() {
+        if(config.contains("distanceBetweenChunks") && config.isInt("distanceBetweenChunks")) {
+            this.distanceBetweenChunks = config.getInt("distanceBetweenChunks");
+        }
+    }
+
     public Map<Integer, Material> getForcedLayers() {
         return this.forcedLayers;
     }
@@ -130,12 +135,16 @@ public class ConfigManager {
         return this.delayBetweenLayers;
     }
 
+    public int getDistanceBetweenChunks() {
+        return this.distanceBetweenChunks;
+    }
+
     public String colorFormat(String text) {
         return ChatColor.translateAlternateColorCodes('&', text);
     }
 
     public String formatLootMessage(String blockDisplayName, String height) {
-        String message = notifyLootMessage;
+        String message = getNotifyLootMessage();
         if(notifyLootMessage.contains("{BLOCK_NAME}")) {
             message = message.replace("{BLOCK_NAME}", blockDisplayName);
         }
