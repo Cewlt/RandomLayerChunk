@@ -1,4 +1,4 @@
-# - What height the random layer chunk will begin at
+# What height the random layer chunk will begin at
 # This cannot be 0 - it can be any valid Minecraft world height other than that
 # default: 250
 startHeightY: 250
